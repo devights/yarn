@@ -169,6 +169,9 @@ function show_thread(thread_id) {
 
     }, 1000);
 
+
+    $('#current_thread').html(open_threads[thread_id]['thread_name']);
+
     window.current_open_thread = thread_id;
     
     // (mobile only) close the sidebar once a thread has been selected
@@ -236,6 +239,9 @@ function draw_new_thread(data, args) {
         $($.parseHTML(initial_content)).appendTo("#tabs");
         $($.parseHTML(rendered_users)).appendTo("#people_list");
     }
+    open_threads[data.thread.id] = {};
+    open_threads[data.thread.id]['max_artifact_id'] = data.max_artifact_id;
+    open_threads[data.thread.id]['thread_name'] = data.thread.name;
 
     if (args && args.highlight) {
         show_thread(data.thread.id);
@@ -250,7 +256,6 @@ function draw_new_thread(data, args) {
         updater: typeahead_updater
     });
 */
-    open_threads[data.thread.id] = data.max_artifact_id;
 
     if (args && args.alert_on_load) {
         alert_thread(thread_id);
@@ -397,7 +402,7 @@ function change_thread_name(thread_id, name) {
     };
 
     $.ajax('api/v1/thread/'+thread_id, post_args);
-
+    open_threads[thread.id]['thread_name'] = name;
 }
 
 function change_managers_from_panel(value) {
@@ -557,7 +562,7 @@ function periodic_thread_update() {
     for (var key in open_threads) {
         if (open_threads.hasOwnProperty(key)) {
             run_update = true;
-            threads_to_update.push([key, open_threads[key]].join(":"));
+            threads_to_update.push([key, open_threads[key]['max_artifact_id']].join(":"));
         }
     }
 
@@ -674,7 +679,7 @@ function update_threads(data) {
             $("#online_user_list_"+thread_id).html(rendered_users);
         }
 
-        open_threads[thread_id] = thread_data.max_artifact_id;
+        open_threads[thread.id][max_artifact_id] = thread_data.max_artifact_id;
 
     }
 
